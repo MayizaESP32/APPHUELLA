@@ -51,7 +51,7 @@ namespace APPHUELLA
                 if (respuesta["status"] == "success")
                 {
                     // Usuario registrado, navegar a AbrirCaja
-                    await Navigation.PushAsync(new AbrirCaja(username));
+                    await Navigation.PushAsync(new AbrirCaja(username,password));
                     PasswordEntry.Text = "";
                     UsernameEntry.Text = "";
                 }
