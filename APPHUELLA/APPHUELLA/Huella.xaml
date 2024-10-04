@@ -17,7 +17,7 @@
                                FontSize="24" 
                                HorizontalOptions="Center"
                                FontAttributes="Bold" />
-                        <Image Source="identificion-de-toque.png"
+                        <Image Source="icono_huella_mano.png"
                                HeightRequest="120"
                                HorizontalOptions="Center" />
                         <Button x:Name="CaptureHuellaButton" 
