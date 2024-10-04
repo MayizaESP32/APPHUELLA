@@ -1,0 +1,59 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="APPHUELLA.Registro"
+             NavigationPage.HasNavigationBar="False"
+             BackgroundColor="#1A1A1A">
+    <ContentPage.Content>
+        <ScrollView>
+            <StackLayout Padding="30" Spacing="50">
+                <Image Source="icono_caja_fuerte.png"
+                       HeightRequest="100"
+                       HorizontalOptions="Center" />
+
+                <Frame BackgroundColor="#2C2C2C" CornerRadius="10" Padding="40">
+                    <StackLayout Spacing="15">
+                        <Label Text="Registro de Usuario" 
+                               TextColor="#FFD700" 
+                               FontSize="24" 
+                               HorizontalOptions="Center"
+                               FontAttributes="Bold" />
+
+                        <Frame BackgroundColor="#3D3D3D" CornerRadius="5" Padding="5">
+                            <Entry x:Name="UsernameEntry" 
+                                   Placeholder="Usuario" 
+                                   PlaceholderColor="#999999"
+                                   TextColor="#FFFFFF" />
+                        </Frame>
+
+                        <Frame BackgroundColor="#3D3D3D" CornerRadius="5" Padding="5">
+                            <Entry x:Name="PasswordEntry" 
+                                   Placeholder="Contraseña" 
+                                   IsPassword="True"
+                                   PlaceholderColor="#999999"
+                                   TextColor="#FFFFFF" />
+                        </Frame>
+
+                        <Button Text="Guardar y Continuar" 
+                                Clicked="OnGuardarClicked"
+                                BackgroundColor="#FFD700"
+                                TextColor="#1A1A1A"
+                                CornerRadius="25"
+                                HeightRequest="50"
+                                FontAttributes="Bold" />
+
+                        <Label Text="Tu seguridad es nuestra prioridad" 
+                               TextColor="#CCCCCC" 
+                               FontSize="14" 
+                               HorizontalOptions="Center" />
+                    </StackLayout>
+                </Frame>
+
+                <Label Text="Protegiendo a cada momento" 
+                       TextColor="#FFD700" 
+                       FontSize="18" 
+                       HorizontalOptions="Center" />
+            </StackLayout>
+        </ScrollView>
+    </ContentPage.Content>
+</ContentPage>

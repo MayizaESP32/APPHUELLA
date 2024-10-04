@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="APPHUELLA.Huella"
+             NavigationPage.HasNavigationBar="False"
+             BackgroundColor="#1A1A1A">
+    <ContentPage.Content>
+        <ScrollView>
+            <StackLayout Padding="20" Spacing="20">
+                <Image Source=""
+                       HeightRequest="100"
+                       HorizontalOptions="Center" />
+                <Frame BackgroundColor="#2C2C2C" CornerRadius="10" Padding="20">
+                    <StackLayout Spacing="15">
+                        <Label Text="Autenticación Biométrica" 
+                               TextColor="#FFD700" 
+                               FontSize="24" 
+                               HorizontalOptions="Center"
+                               FontAttributes="Bold" />
+                        <Image Source="identificion-de-toque.png"
+                               HeightRequest="120"
+                               HorizontalOptions="Center" />
+                        <Button x:Name="CaptureHuellaButton" 
+                                Text="Capturar y Enviar Huella" 
+                                Clicked="OnCaptureHuellaClicked"
+                                BackgroundColor="#FFD700"
+                                TextColor="#1A1A1A"
+                                CornerRadius="25"
+                                HeightRequest="50"
+                                FontAttributes="Bold" />
+                        <Label x:Name="HuellaResult" 
+                               TextColor="#FFFFFF"
+                               HorizontalOptions="Center" />
+                        <ActivityIndicator x:Name="LoadingIndicator" 
+                                           IsRunning="False" 
+                                           Color="#FFD700" />
+                    </StackLayout>
+                </Frame>
+                <Label Text="Seguridad a tu alcance" 
+                       TextColor="#FFD700" 
+                       FontSize="18" 
+                       HorizontalOptions="Center" />
+            </StackLayout>
+        </ScrollView>
+    </ContentPage.Content>
+</ContentPage>
