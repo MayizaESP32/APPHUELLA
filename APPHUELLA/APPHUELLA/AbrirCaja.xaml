@@ -1,9 +1,0 @@
-﻿<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="APPHUELLA.AbrirCaja">
-    <StackLayout>
-        <Button x:Name="CaptureHuellaButton" Text="Capturar Huella" Clicked="OnCaptureHuellaClicked"/>
-        <Label x:Name="HuellaResult"/>
-        <ActivityIndicator x:Name="LoadingIndicator" IsRunning="False"/>
-    </StackLayout>
-</ContentPage>

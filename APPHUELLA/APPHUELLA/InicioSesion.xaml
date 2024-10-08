@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="APPHUELLA.Inicio"
+             x:Class="APPHUELLA.InicioSesion"
              NavigationPage.HasNavigationBar="False"
              BackgroundColor="#1A1A1A">
     <ContentPage.Content>
@@ -13,7 +13,7 @@
 
                 <Frame BackgroundColor="#2C2C2C" CornerRadius="10" Padding="40">
                     <StackLayout Spacing="15">
-                        <Label Text="Apertura de Caja" 
+                        <Label Text="INICIO DE SESION" 
                                TextColor="#FFD700" 
                                FontSize="24" 
                                HorizontalOptions="Center"
@@ -34,8 +34,8 @@
                                    TextColor="#FFFFFF" />
                         </Frame>
 
-                        <Button Text="Continuar" 
-                                Clicked="OnIniciarSesionClicked"
+                        <Button Text="INICIAR SESION" 
+                                Clicked="Iniciar_Clicked"
                                 BackgroundColor="#FFD700"
                                 TextColor="#1A1A1A"
                                 CornerRadius="25"

@@ -9,7 +9,7 @@ namespace APPHUELLA
         public App()
         {
             InitializeComponent();
-            MainPage = new NavigationPage(new Menu());
+            MainPage = new NavigationPage(new InicioSesion());
         }
 
         protected override void OnStart()

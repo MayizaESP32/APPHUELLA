@@ -6,6 +6,7 @@ using Plugin.Fingerprint.Abstractions;
 using HTTPupt;
 using Xamarin.Forms.Xaml;
 using Newtonsoft.Json;
+using APPHUELLA.Modelos;
 
 namespace APPHUELLA
 {
@@ -13,7 +14,7 @@ namespace APPHUELLA
     public partial class Huella : ContentPage
     {
         PeticionHTTP peticion = new PeticionHTTP("http://192.168.1.1");
-        private string deviceIdentifier;
+        private string deviceImei;
         private string username;
         private string password;
 
@@ -22,7 +23,7 @@ namespace APPHUELLA
             InitializeComponent();
             username = user;
             password = pass;
-            deviceIdentifier = GetDeviceIdentifier();
+            deviceImei = GetDeviceImei();
         }
 
         private async void OnCaptureHuellaClicked(object sender, EventArgs e)
@@ -34,7 +35,6 @@ namespace APPHUELLA
                     "Por favor, escanee su huella",
                     "Necesitamos verificar su identidad");
                 var result = await CrossFingerprint.Current.AuthenticateAsync(authConfig);
-
                 if (result.Authenticated)
                 {
                     HuellaResult.Text = "Huella capturada exitosamente";
@@ -57,35 +57,42 @@ namespace APPHUELLA
 
         private async Task SaveHuellaData()
         {
-            if (string.IsNullOrEmpty(deviceIdentifier))
+            if (string.IsNullOrEmpty(deviceImei))
             {
-                await DisplayAlert("Error", "No se pudo obtener el identificador del dispositivo", "OK");
+                await DisplayAlert("Error", "No se pudo obtener el IMEI del dispositivo", "OK");
                 return;
             }
-
             try
             {
-                var userData = new
+                Usuario usuario = new Usuario()
                 {
-                    usuario = username,
-                    contrasena = password,
-                    huella = deviceIdentifier
+                    Nombre = username,
+                    Contraseña = password,
+                    Huella = deviceImei
                 };
-                string jsonData = JsonConvert.SerializeObject(userData);
+                string jsonData = JsonConvert.SerializeObject(usuario);
                 peticion.PedirComunicacion("saveHuella", MetodoHTTP.POST, TipoContenido.JSON);
                 peticion.enviarDatos(jsonData);
                 string responseJson = peticion.ObtenerJson();
-                await DisplayAlert("Éxito", "Registro completo con huella enviada correctamente", "OK");
-                await Navigation.PopToRootAsync();
+                var response = JsonConvert.DeserializeObject<UpdateHuellaResponse>(responseJson);
 
+                if (response.status == "success")
+                {
+                    await DisplayAlert("Éxito", "Huella (IMEI) registrada correctamente", "OK");
+                    await Navigation.PopAsync();
+                }
+                else
+                {
+                    await DisplayAlert("Error", response.message, "OK");
+                }
             }
             catch (Exception ex)
             {
-                await DisplayAlert("Error", $"Error al enviar datos de huella: {ex.Message}", "OK");
+                await DisplayAlert("Error", $"Error al registrar la huella: {ex.Message}", "OK");
             }
         }
 
-        private string GetDeviceIdentifier()
+        private string GetDeviceImei()
         {
             try
             {
@@ -101,5 +108,11 @@ namespace APPHUELLA
     public interface IDeviceIdentifier
     {
         string GetIdentifier();
+    }
+
+    public class UpdateHuellaResponse
+    {
+        public string status { get; set; }
+        public string message { get; set; }
     }
 }
