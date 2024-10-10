@@ -16,20 +16,17 @@ namespace APPHUELLA
         PeticionHTTP peticion = new PeticionHTTP("http://192.168.1.1");
         private string username;
         private string password;
-        private string tokenGuardado; // Almacena el token de huella guardado
 
-        public Huella(string user, string pass)
+        public Huella(string user)
         {
             InitializeComponent();
             username = user;
-            password = pass;
+            
 
-            // Verificar si el usuario ya tiene huella registrada
-            VerificarCredencialesYHuella(username, password);
+            VerificarCredencialesYToken(username, password);
         }
 
-        // Método que se llama al hacer login (verifica si ya tiene huella o no)
-        private async Task<bool> VerificarCredencialesYHuella(string username, string password)
+        private async Task<bool> VerificarCredencialesYToken(string username, string password)
         {
             try
             {
@@ -48,11 +45,11 @@ namespace APPHUELLA
 
                 if (response.status == "success" && !string.IsNullOrEmpty(response.tokenHuella))
                 {
-                    tokenGuardado = response.tokenHuella;
-                    return true; // Ya tiene huella registrada
+                    await DisplayAlert("Información", "Ya tienes un token de huella registrado", "OK");
+                    return true;
                 }
 
-                return false; // No tiene huella registrada
+                return false;
             }
             catch (Exception ex)
             {
@@ -61,20 +58,19 @@ namespace APPHUELLA
             }
         }
 
-        // Método para capturar y guardar la huella
         private async void OnCaptureHuellaClicked(object sender, EventArgs e)
         {
             try
             {
                 var authConfig = new AuthenticationRequestConfiguration(
                     "Por favor, escanee su huella",
-                    "Necesitamos registrar su huella digital");
+                    "Necesitamos verificar su huella digital");
                 var result = await CrossFingerprint.Current.AuthenticateAsync(authConfig);
 
                 if (result.Authenticated)
                 {
-                    string tokenHuella = GenerarTokenHuella();
-                    await GuardarHuellaData(tokenHuella);
+                    string nuevoToken = GenerarTokenHuella();
+                    await GuardarTokenHuella(nuevoToken);
                 }
                 else
                 {
@@ -87,26 +83,23 @@ namespace APPHUELLA
             }
         }
 
-        // Generar token único (simula el hash de la huella)
         private string GenerarTokenHuella()
         {
-            return Guid.NewGuid().ToString("N"); // Token como un GUID
+            return Guid.NewGuid().ToString("N"); // Genera un token único
         }
 
-        // Guardar el token de la huella
-        private async Task GuardarHuellaData(string tokenHuella)
+        private async Task GuardarTokenHuella(string nuevoToken)
         {
             try
             {
-                Usuario usuario = new Usuario
+                var tokenData = new
                 {
-                    Nombre = username,
-                    Contraseña = password,
-                    Huella = tokenHuella // Guardamos el token como huella
+                    usuario = username,
+                    huella = nuevoToken
                 };
 
-                string jsonData = JsonConvert.SerializeObject(usuario);
-                peticion.PedirComunicacion("guardarHuella", MetodoHTTP.POST, TipoContenido.JSON);
+                string jsonData = JsonConvert.SerializeObject(tokenData);
+                peticion.PedirComunicacion("saveHuella", MetodoHTTP.POST, TipoContenido.JSON);
                 peticion.enviarDatos(jsonData);
 
                 string responseJson = peticion.ObtenerJson();
@@ -114,7 +107,7 @@ namespace APPHUELLA
 
                 if (response.status == "success")
                 {
-                    await DisplayAlert("Éxito", "Huella registrada correctamente", "OK");
+                    await DisplayAlert("Éxito", "Token de huella registrado correctamente", "OK");
                     await Navigation.PopAsync();
                 }
                 else
@@ -124,46 +117,11 @@ namespace APPHUELLA
             }
             catch (Exception ex)
             {
-                await DisplayAlert("Error", $"Error al registrar la huella: {ex.Message}", "OK");
-            }
-        }
-
-        // Método para abrir la caja comparando la huella
-        private async void OnAbrirCajaClicked(object sender, EventArgs e)
-        {
-            try
-            {
-                var authConfig = new AuthenticationRequestConfiguration(
-                    "Verifica tu huella",
-                    "Necesitamos verificar tu identidad para abrir la caja");
-                var result = await CrossFingerprint.Current.AuthenticateAsync(authConfig);
-
-                if (result.Authenticated)
-                {
-                    // Aquí suponemos que el token de la huella ya fue guardado en tokenGuardado
-                    if (tokenGuardado != null)
-                    {
-                        await DisplayAlert("Éxito", "Caja abierta correctamente", "OK");
-                        // Lógica para abrir la caja
-                    }
-                    else
-                    {
-                        await DisplayAlert("Error", "La huella no coincide con la registrada", "OK");
-                    }
-                }
-                else
-                {
-                    await DisplayAlert("Error", "Falló la autenticación de la huella", "OK");
-                }
-            }
-            catch (Exception ex)
-            {
-                await DisplayAlert("Error", $"Error al abrir la caja: {ex.Message}", "OK");
+                await DisplayAlert("Error", $"Error al registrar el token de huella: {ex.Message}", "OK");
             }
         }
     }
 
-    // Modelos de respuesta para las solicitudes
     public class VerificarUsuarioResponse
     {
         public string status { get; set; }

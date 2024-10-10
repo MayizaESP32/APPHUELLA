@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="APPHUELLA.InicioSesion"
+             x:Class="APPHUELLA.Registro"
              NavigationPage.HasNavigationBar="False"
              BackgroundColor="#121212">
     <ContentPage.Content>
@@ -19,7 +19,7 @@
                        Padding="30" 
                        HasShadow="True">
                     <StackLayout Spacing="25">
-                        <Label Text="INICIO DE SESIÓN" 
+                        <Label Text="Registro" 
                                TextColor="#FFD700" 
                                FontSize="26" 
                                HorizontalOptions="Center"
@@ -46,8 +46,7 @@
 
                         <!-- Botón de inicio de sesión -->
                         <Button Text="INICIAR SESIÓN" 
-                                x:Name="Iniciar"
-                                Clicked="Iniciar_Clicked"
+                                Clicked="OnGuardarClicked"
                                 BackgroundColor="#FFD700"
                                 TextColor="#121212"
                                 CornerRadius="30"

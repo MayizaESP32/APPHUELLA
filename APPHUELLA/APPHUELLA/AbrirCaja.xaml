@@ -3,43 +3,61 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="APPHUELLA.AbrirCaja"
              NavigationPage.HasNavigationBar="False"
-             BackgroundColor="#1A1A1A">
+             BackgroundColor="#121212">
     <ContentPage.Content>
         <ScrollView>
-            <StackLayout Padding="20" Spacing="20">
-                <Image Source=""
-                       HeightRequest="100"
-                       HorizontalOptions="Center" />
-                <Frame BackgroundColor="#2C2C2C" CornerRadius="10" Padding="20">
-                    <StackLayout Spacing="15">
+            <StackLayout Padding="30" Spacing="30">
+                <!-- Logo o Imagen -->
+                <Image Source="logo.png"
+                       HeightRequest="80"
+                       HorizontalOptions="Center"
+                       Aspect="AspectFit" />
+
+                <!-- Tarjeta de autenticación -->
+                <Frame BackgroundColor="#1E1E1E" 
+                       CornerRadius="20" 
+                       Padding="25" 
+                       HasShadow="True">
+                    <StackLayout Spacing="20">
                         <Label Text="Autenticación Biométrica" 
                                TextColor="#FFD700" 
-                               FontSize="24" 
+                               FontSize="26" 
                                HorizontalOptions="Center"
                                FontAttributes="Bold" />
+
                         <Image Source="icono_huella_mano.png"
-                               HeightRequest="120"
+                               HeightRequest="130"
                                HorizontalOptions="Center" />
+
                         <Button x:Name="CaptureHuellaButton" 
                                 Text="Abrir Caja" 
-                                Clicked="OnCaptureHuellaClicked"
+                                Clicked="OnAbrirCajaClicked"
                                 BackgroundColor="#FFD700"
-                                TextColor="#1A1A1A"
-                                CornerRadius="25"
-                                HeightRequest="50"
-                                FontAttributes="Bold" />
+                                TextColor="#121212"
+                                CornerRadius="30"
+                                HeightRequest="55"
+                                FontAttributes="Bold" 
+                                FontSize="18"/>
+
                         <Label x:Name="HuellaResult" 
                                TextColor="#FFFFFF"
-                               HorizontalOptions="Center" />
+                               FontSize="16"
+                               HorizontalOptions="Center" 
+                               IsVisible="False" />
+
                         <ActivityIndicator x:Name="LoadingIndicator" 
                                            IsRunning="False" 
-                                           Color="#FFD700" />
+                                           Color="#FFD700" 
+                                           HorizontalOptions="Center" />
                     </StackLayout>
                 </Frame>
+
+                <!-- Mensaje de seguridad -->
                 <Label Text="Seguridad a tu alcance" 
                        TextColor="#FFD700" 
-                       FontSize="18" 
-                       HorizontalOptions="Center" />
+                       FontSize="20" 
+                       HorizontalOptions="Center"
+                       FontAttributes="Italic" />
             </StackLayout>
         </ScrollView>
     </ContentPage.Content>
