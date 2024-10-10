@@ -15,13 +15,15 @@ namespace APPHUELLA
     {
         PeticionHTTP peticion = new PeticionHTTP("http://192.168.1.1");
         private string username;
-        private string huella;
+        private string huellaRegistrada;
+        private string tokenRegistrado;
 
-        public AbrirCaja(string username, string huella)
+        public AbrirCaja(string username, string huella, string token)
         {
             InitializeComponent();
             this.username = username;
-            this.huella = huella;
+            this.huellaRegistrada = huella;
+            this.tokenRegistrado = token;
         }
 
         private async void OnAbrirCajaClicked(object sender, EventArgs e)
@@ -32,9 +34,11 @@ namespace APPHUELLA
                     "Verifica tu huella",
                     "Necesitamos verificar su identidad para abrir la caja");
                 var result = await CrossFingerprint.Current.AuthenticateAsync(authConfig);
+
                 if (result.Authenticated)
                 {
-                    await VerificarHuellaYAbrirCaja();
+                    string huellaCaptured = GenerarHuellaDummy(); // Reemplazar con la captura real de huella
+                    await VerificarHuellaYAbrirCaja(huellaCaptured);
                 }
                 else
                 {
@@ -47,25 +51,33 @@ namespace APPHUELLA
             }
         }
 
-        private async Task VerificarHuellaYAbrirCaja()
+        private string GenerarHuellaDummy()
+        {
+            return huellaRegistrada; // Simula que la huella capturada es igual a la registrada
+        }
+
+        private async Task VerificarHuellaYAbrirCaja(string huellaCaptured)
         {
             try
             {
                 var datos = new
                 {
-                    Nombre = username,
-                    Huella = huella
+                    usuario = username,
+                    huella = huellaCaptured,
+                    token = tokenRegistrado
                 };
+
                 string jsonData = JsonConvert.SerializeObject(datos);
-                peticion.PedirComunicacion("verifyHuella", MetodoHTTP.POST, TipoContenido.JSON);
+                peticion.PedirComunicacion("checkHuella", MetodoHTTP.POST, TipoContenido.JSON);
                 peticion.enviarDatos(jsonData);
+
                 string responseJson = peticion.ObtenerJson();
                 var response = JsonConvert.DeserializeObject<VerificarHuellaResponse>(responseJson);
 
                 if (response.status == "success")
                 {
                     string storedToken = await SecureStorage.GetAsync("huellaToken");
-                    if (storedToken == response.token)
+                    if (storedToken == tokenRegistrado)
                     {
                         await DisplayAlert("Éxito", "Huella verificada. La caja se puede abrir.", "OK");
                         // Aquí puedes agregar código adicional para abrir la caja si es necesario
@@ -91,6 +103,5 @@ namespace APPHUELLA
     {
         public string status { get; set; }
         public string message { get; set; }
-        public string token { get; set; }
     }
 }

@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "APPHUELLA": {
+      "commandName": "Project",
+      "remoteDebugEnabled": false
+    }
+  }
+}

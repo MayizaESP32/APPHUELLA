@@ -45,7 +45,7 @@
                         </Frame>
 
                         <!-- Botón de inicio de sesión -->
-                        <Button Text="INICIAR SESIÓN" 
+                        <Button Text="ENVIAR" 
                                 Clicked="OnGuardarClicked"
                                 BackgroundColor="#FFD700"
                                 TextColor="#121212"
