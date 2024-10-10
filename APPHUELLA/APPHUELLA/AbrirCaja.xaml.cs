@@ -6,7 +6,6 @@ using Plugin.Fingerprint.Abstractions;
 using HTTPupt;
 using Xamarin.Forms.Xaml;
 using Newtonsoft.Json;
-using Xamarin.Essentials;
 
 namespace APPHUELLA
 {
@@ -15,15 +14,13 @@ namespace APPHUELLA
     {
         PeticionHTTP peticion = new PeticionHTTP("http://192.168.1.1");
         private string username;
-        private string huellaRegistrada;
-        private string tokenRegistrado;
+        private BiometricStorage biometricStorage;
 
-        public AbrirCaja(string username, string huella, string token)
+        public AbrirCaja(string username)
         {
             InitializeComponent();
             this.username = username;
-            this.huellaRegistrada = huella;
-            this.tokenRegistrado = token;
+            biometricStorage = new BiometricStorage();
         }
 
         private async void OnAbrirCajaClicked(object sender, EventArgs e)
@@ -31,18 +28,19 @@ namespace APPHUELLA
             try
             {
                 var authConfig = new AuthenticationRequestConfiguration(
-                    "Verifica tu huella",
-                    "Necesitamos verificar su identidad para abrir la caja");
+                    "Verificar huella",
+                    "Por favor, coloque su dedo en el sensor de huella para abrir la caja")
+                {
+                    AllowAlternativeAuthentication = false
+                };
                 var result = await CrossFingerprint.Current.AuthenticateAsync(authConfig);
-
                 if (result.Authenticated)
                 {
-                    string huellaCaptured = GenerarHuellaDummy(); // Reemplazar con la captura real de huella
-                    await VerificarHuellaYAbrirCaja(huellaCaptured);
+                    await VerificarHuellaYAbrirCaja();
                 }
                 else
                 {
-                    await DisplayAlert("Error", "Falló la autenticación de la huella", "OK");
+                    await DisplayAlert("Error", "No se pudo autenticar la huella", "OK");
                 }
             }
             catch (Exception ex)
@@ -51,41 +49,31 @@ namespace APPHUELLA
             }
         }
 
-        private string GenerarHuellaDummy()
-        {
-            return huellaRegistrada; // Simula que la huella capturada es igual a la registrada
-        }
-
-        private async Task VerificarHuellaYAbrirCaja(string huellaCaptured)
+        private async Task VerificarHuellaYAbrirCaja()
         {
             try
             {
+                string storedToken = await biometricStorage.GetToken();
+                if (string.IsNullOrEmpty(storedToken))
+                {
+                    await DisplayAlert("Error", "No hay huella registrada. Por favor, registre una primero.", "OK");
+                    return;
+                }
+
                 var datos = new
                 {
                     usuario = username,
-                    huella = huellaCaptured,
-                    token = tokenRegistrado
+                    token = storedToken
                 };
-
                 string jsonData = JsonConvert.SerializeObject(datos);
                 peticion.PedirComunicacion("checkHuella", MetodoHTTP.POST, TipoContenido.JSON);
                 peticion.enviarDatos(jsonData);
-
                 string responseJson = peticion.ObtenerJson();
                 var response = JsonConvert.DeserializeObject<VerificarHuellaResponse>(responseJson);
-
                 if (response.status == "success")
                 {
-                    string storedToken = await SecureStorage.GetAsync("huellaToken");
-                    if (storedToken == tokenRegistrado)
-                    {
-                        await DisplayAlert("Éxito", "Huella verificada. La caja se puede abrir.", "OK");
-                        // Aquí puedes agregar código adicional para abrir la caja si es necesario
-                    }
-                    else
-                    {
-                        await DisplayAlert("Error", "Token de huella no coincide. No se puede abrir la caja.", "OK");
-                    }
+                    await DisplayAlert("Éxito", "Huella verificada. La caja se puede abrir.", "OK");
+                    // Aquí puedes agregar código adicional para abrir la caja si es necesario
                 }
                 else
                 {

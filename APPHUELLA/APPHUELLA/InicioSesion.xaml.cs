@@ -11,10 +11,12 @@ namespace APPHUELLA
     public partial class InicioSesion : ContentPage
     {
         PeticionHTTP peticion = new PeticionHTTP("http://192.168.1.1");
+        private BiometricStorage biometricStorage;
 
         public InicioSesion()
         {
             InitializeComponent();
+            biometricStorage = new BiometricStorage();
         }
 
         private async void Iniciar_Clicked(object sender, EventArgs e)
@@ -46,13 +48,16 @@ namespace APPHUELLA
                     var respuesta = JsonConvert.DeserializeObject<RespuestaLogin>(json);
                     if (respuesta != null && respuesta.status == "success")
                     {
+                        // Guardar el token en el almacenamiento seguro
+                        await biometricStorage.SaveToken(respuesta.token);
+
                         if (!respuesta.huellaRegistrada)
                         {
-                            await Navigation.PushAsync(new Huella(username, respuesta.token));
+                            await Navigation.PushAsync(new Huella(username));
                         }
                         else
                         {
-                            await Navigation.PushAsync(new AbrirCaja(username, respuesta.huella, respuesta.token));
+                            await Navigation.PushAsync(new AbrirCaja(username));
                         }
                     }
                     else

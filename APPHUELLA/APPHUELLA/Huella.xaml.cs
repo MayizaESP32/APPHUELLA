@@ -6,7 +6,6 @@ using Plugin.Fingerprint.Abstractions;
 using HTTPupt;
 using Xamarin.Forms.Xaml;
 using Newtonsoft.Json;
-using Xamarin.Essentials;
 using APPHUELLA.Modelos;
 
 namespace APPHUELLA
@@ -16,32 +15,42 @@ namespace APPHUELLA
     {
         PeticionHTTP peticion = new PeticionHTTP("http://192.168.1.1");
         private string username;
-        private string token;
+        private BiometricStorage biometricStorage;
 
-        public Huella(string user, string token)
+        public Huella(string user)
         {
             InitializeComponent();
             username = user;
-            this.token = token;
+            biometricStorage = new BiometricStorage();
         }
 
         private async void OnCaptureHuellaClicked(object sender, EventArgs e)
         {
             try
             {
-                var authConfig = new AuthenticationRequestConfiguration(
-                    "Por favor, escanee su huella",
-                    "Necesitamos registrar su huella digital");
-                var result = await CrossFingerprint.Current.AuthenticateAsync(authConfig);
+                var availability = await CrossFingerprint.Current.IsAvailableAsync();
+                if (!availability)
+                {
+                    await DisplayAlert("Error", "La autenticación de huella no está disponible en este dispositivo", "OK");
+                    return;
+                }
 
+                var authConfig = new AuthenticationRequestConfiguration(
+                    "Registrar huella",
+                    "Por favor, coloque su dedo en el sensor de huella para registrar")
+                {
+                    AllowAlternativeAuthentication = false
+                };
+
+                var result = await CrossFingerprint.Current.AuthenticateAsync(authConfig);
                 if (result.Authenticated)
                 {
-                    string huellaCapturada = GenerarHuellaDummy(); // Reemplazar con la captura real de huella
-                    await GuardarHuella(huellaCapturada);
+                    string token = Guid.NewGuid().ToString("N");
+                    await GuardarHuella(token);
                 }
                 else
                 {
-                    await DisplayAlert("Error", "Falló la captura de la huella", "OK");
+                    await DisplayAlert("Error", "No se pudo autenticar la huella", "OK");
                 }
             }
             catch (Exception ex)
@@ -50,34 +59,25 @@ namespace APPHUELLA
             }
         }
 
-        private string GenerarHuellaDummy()
-        {
-            return Guid.NewGuid().ToString("N"); // Simula una huella única
-        }
-
-        private async Task GuardarHuella(string huella)
+        private async Task GuardarHuella(string token)
         {
             try
             {
                 var datos = new
                 {
                     usuario = username,
-                    huella = huella,
                     token = token
                 };
-
                 string jsonData = JsonConvert.SerializeObject(datos);
                 peticion.PedirComunicacion("saveHuella", MetodoHTTP.POST, TipoContenido.JSON);
                 peticion.enviarDatos(jsonData);
-
                 string responseJson = peticion.ObtenerJson();
                 var response = JsonConvert.DeserializeObject<GuardarHuellaResponse>(responseJson);
-
                 if (response.status == "success")
                 {
-                    await SecureStorage.SetAsync("huellaToken", token);
+                    await biometricStorage.SaveToken(token);
                     await DisplayAlert("Éxito", "Huella registrada correctamente", "OK");
-                    await Navigation.PushAsync(new AbrirCaja(username, huella, token));
+                    await Navigation.PushAsync(new AbrirCaja(username));
                 }
                 else
                 {
