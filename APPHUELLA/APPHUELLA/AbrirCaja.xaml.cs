@@ -27,34 +27,8 @@ namespace APPHUELLA
         {
             try
             {
-                var authConfig = new AuthenticationRequestConfiguration(
-                    "Verificar huella",
-                    "Por favor, coloque su dedo en el sensor de huella para abrir la caja")
-                {
-                    AllowAlternativeAuthentication = false
-                };
-                var result = await CrossFingerprint.Current.AuthenticateAsync(authConfig);
-                if (result.Authenticated)
-                {
-                    await VerificarHuellaYAbrirCaja();
-                }
-                else
-                {
-                    await DisplayAlert("Error", "No se pudo autenticar la huella", "OK");
-                }
-            }
-            catch (Exception ex)
-            {
-                await DisplayAlert("Error", $"Error al abrir la caja: {ex.Message}", "OK");
-            }
-        }
-
-        private async Task VerificarHuellaYAbrirCaja()
-        {
-            try
-            {
-                string storedToken = await biometricStorage.GetToken();
-                if (string.IsNullOrEmpty(storedToken))
+                string token = await biometricStorage.GetToken();
+                if (string.IsNullOrEmpty(token))
                 {
                     await DisplayAlert("Error", "No hay huella registrada. Por favor, registre una primero.", "OK");
                     return;
@@ -63,17 +37,18 @@ namespace APPHUELLA
                 var datos = new
                 {
                     usuario = username,
-                    token = storedToken
+                    token = token
                 };
                 string jsonData = JsonConvert.SerializeObject(datos);
-                peticion.PedirComunicacion("checkHuella", MetodoHTTP.POST, TipoContenido.JSON);
+                peticion.PedirComunicacion("openBox", MetodoHTTP.POST, TipoContenido.JSON);
                 peticion.enviarDatos(jsonData);
                 string responseJson = peticion.ObtenerJson();
-                var response = JsonConvert.DeserializeObject<VerificarHuellaResponse>(responseJson);
+                var response = JsonConvert.DeserializeObject<OpenBoxResponse>(responseJson);
+
                 if (response.status == "success")
                 {
-                    await DisplayAlert("Éxito", "Huella verificada. La caja se puede abrir.", "OK");
-                    // Aquí puedes agregar código adicional para abrir la caja si es necesario
+                    await DisplayAlert("Éxito", "Solicitud de apertura procesando", "OK");
+                    await VerificarHuella();
                 }
                 else
                 {
@@ -82,12 +57,38 @@ namespace APPHUELLA
             }
             catch (Exception ex)
             {
-                await DisplayAlert("Error", $"Error al verificar la huella y abrir la caja: {ex.Message}", "OK");
+                await DisplayAlert("Error", $"Error al abrir la caja: {ex.Message}", "OK");
+            }
+        }
+
+        private async Task VerificarHuella()
+        {
+            try
+            {
+                var authConfig = new AuthenticationRequestConfiguration(
+                    "Verificar huella",
+                    "Por favor, coloque su dedo en el sensor de huella para confirmar")
+                {
+                    AllowAlternativeAuthentication = false
+                };
+                var result = await CrossFingerprint.Current.AuthenticateAsync(authConfig);
+                if (result.Authenticated)
+                {
+                    await DisplayAlert("Éxito", "Huella verificada. La caja está abierta.", "OK");
+                }
+                else
+                {
+                    await DisplayAlert("Error", "No se pudo verificar la huella", "OK");
+                }
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Error", $"Error al verificar la huella: {ex.Message}", "OK");
             }
         }
     }
 
-    public class VerificarHuellaResponse
+    public class OpenBoxResponse
     {
         public string status { get; set; }
         public string message { get; set; }
